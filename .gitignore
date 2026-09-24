@@ -1,0 +1,29 @@
+# Python caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Virtual environment
+.venv/
+
+# Data files (tracked by DVC, not Git)
+/data/**/*.csv
+/data/processed/
+
+# Model artifacts
+/models/
+*.pkl
+*.joblib
+
+# MLflow tracking files
+/mlruns/
+/mlartifacts/
+mlflow.db
+
+# Generated drift reports
+/reports/*.html
+
+# Editor and OS files
+.vscode/
+Thumbs.db
+.DS_Store

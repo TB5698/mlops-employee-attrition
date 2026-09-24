@@ -1,0 +1,13 @@
+# Data and modeling
+pandas==3.0.6
+numpy==2.4.6
+scikit-learn==1.9.1
+PyYAML==6.0.3
+
+# MLOps tooling
+dvc==3.67.1
+mlflow==3.16.1
+evidently==0.7.23
+
+# Testing
+pytest==9.1.1
