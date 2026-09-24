@@ -1,0 +1,65 @@
+name: MLOps pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Run tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Download the dataset with DVC
+        run: dvc pull
+
+      - name: Run the test suite
+        run: pytest tests/ -v
+
+  train:
+    name: Train and validate the model
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Download the dataset with DVC
+        run: dvc pull
+
+      # src/train.py exits with code 1 if the model misses any threshold in
+      # configs/config.yaml, which fails this step and the whole pipeline.
+      - name: Train the model and check performance thresholds
+        run: python -m src.train --config configs/config.yaml
+
+      - name: Save the MLflow tracking data from this run
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: mlflow-tracking
+          path: |
+            mlflow.db
+            mlruns/
+          if-no-files-found: ignore
