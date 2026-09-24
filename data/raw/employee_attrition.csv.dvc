@@ -1,0 +1,11 @@
+md5: f7ac1053bb2104b1a7c754587a1f6b94
+frozen: true
+deps:
+- checksum: '"9daaa8cf68411f198fd0990e32c9f3c8ee05186f1e8fde5f99ca4f7f98482e0e"'
+  size: 227977
+  hash: md5
+  path: 
+    https://raw.githubusercontent.com/IBM/employee-attrition-aif360/master/data/emp_attrition.csv
+outs:
+- hash: md5
+  path: employee_attrition.csv
