@@ -1,0 +1,116 @@
+# Main project configuration.
+# Every script in src/ reads its settings from this file instead of hardcoding them.
+
+data:
+  raw_path: data/raw/employee_attrition.csv
+  dvc_file: data/raw/employee_attrition.csv.dvc
+  target_column: Attrition
+  positive_label: "Yes"
+  negative_label: "No"
+  # Three of these hold the same value in every row, and EmployeeNumber is just an ID.
+  drop_columns:
+    - EmployeeCount
+    - EmployeeNumber
+    - Over18
+    - StandardHours
+
+features:
+  numeric:
+    - Age
+    - DailyRate
+    - DistanceFromHome
+    - Education
+    - EnvironmentSatisfaction
+    - HourlyRate
+    - JobInvolvement
+    - JobLevel
+    - JobSatisfaction
+    - MonthlyIncome
+    - MonthlyRate
+    - NumCompaniesWorked
+    - PercentSalaryHike
+    - PerformanceRating
+    - RelationshipSatisfaction
+    - StockOptionLevel
+    - TotalWorkingYears
+    - TrainingTimesLastYear
+    - WorkLifeBalance
+    - YearsAtCompany
+    - YearsInCurrentRole
+    - YearsSinceLastPromotion
+    - YearsWithCurrManager
+  categorical:
+    - BusinessTravel
+    - Department
+    - EducationField
+    - Gender
+    - JobRole
+    - MaritalStatus
+    - OverTime
+  # Features listed here are left out of training (used for feature-set experiments).
+  exclude: []
+
+# The original dataset has no missing values, so I simulate some to exercise the imputation steps.
+missing_values:
+  columns:
+    - MonthlyIncome
+    - TotalWorkingYears
+    - DistanceFromHome
+    - JobRole
+    - MaritalStatus
+  rate: 0.05
+  seed: 42
+
+split:
+  test_size: 0.2
+  random_state: 42
+
+model:
+  type: logistic_regression
+  params:
+    C: 1.0
+    max_iter: 1000
+    class_weight: balanced
+
+mlflow:
+  tracking_uri: sqlite:///mlflow.db
+  experiment_name: employee-attrition
+  run_name: default_training_run
+
+evaluation:
+  primary_metric: roc_auc
+  # Training fails (exit code 1) if any of these minimums are not met.
+  thresholds:
+    roc_auc: 0.75
+    f1: 0.40
+    recall: 0.50
+
+monitoring:
+  report_dir: reports
+  report_name: drift_report.html
+  # Statistical tests: Kolmogorov-Smirnov for numeric, chi-square for categorical.
+  # A feature counts as drifted when the test's p-value is below stattest_threshold.
+  num_method: ks
+  cat_method: chisquare
+  stattest_threshold: 0.05
+  # Exit with code 1 when the share of drifted features is above this value.
+  drift_share_threshold: 0.20
+  simulated_drift:
+    seed: 7
+    changes:
+      - column: Age
+        type: shift
+        value: -6
+      - column: TotalWorkingYears
+        type: scale
+        value: 0.6
+      - column: YearsAtCompany
+        type: scale
+        value: 0.5
+      - column: MonthlyIncome
+        type: scale
+        value: 0.8
+      - column: OverTime
+        type: set_fraction
+        value: "Yes"
+        fraction: 0.35
