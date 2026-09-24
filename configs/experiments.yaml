@@ -1,0 +1,46 @@
+# Five experiments, each run on top of configs/config.yaml.
+# Only the settings that change are listed. A section listed here (for example
+# "model") replaces the matching keys in config.yaml for that run only.
+
+experiments:
+  - run_name: logreg_baseline
+    overrides: {}
+
+  - run_name: logreg_strong_regularization
+    overrides:
+      model:
+        type: logistic_regression
+        params:
+          C: 0.05
+          max_iter: 1000
+          class_weight: balanced
+
+  - run_name: logreg_reduced_features
+    overrides:
+      features:
+        # The three "rate" columns look like random noise, so this run drops them.
+        exclude:
+          - DailyRate
+          - HourlyRate
+          - MonthlyRate
+
+  - run_name: random_forest
+    overrides:
+      model:
+        type: random_forest
+        params:
+          n_estimators: 300
+          max_depth: 8
+          min_samples_leaf: 5
+          class_weight: balanced
+          random_state: 42
+
+  - run_name: gradient_boosting
+    overrides:
+      model:
+        type: gradient_boosting
+        params:
+          n_estimators: 200
+          learning_rate: 0.05
+          max_depth: 3
+          random_state: 42
